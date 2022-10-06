@@ -29,6 +29,10 @@ virtualenv ***
 pyinstaller --clean --onefile -F ***.py
 ```
 我自己试，这样是可以省略掉spec再打包那一步的
+**有界面的时候要加个`-w`**
+```shell
+pyinstaller -F -w --clean --onefile .\2022-10-05\test_filelog.py
+```
 
 4. 做界面
 据说如果是`pyqt5`的话打包也贼大，小玩意儿就用`tkinter`代替了，所以速学一下~

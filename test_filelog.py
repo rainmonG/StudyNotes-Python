@@ -17,8 +17,10 @@ class DealFolder:
         self.path = tkinter.StringVar()
         ttk.Label(mainframe, text="目标路径").grid(column=0, row=0)
         ttk.Entry(mainframe, textvariable= self.path).grid(column=1, row=0)
-        ttk.Button(mainframe, text="路径选择",command=self.select_folder).grid(column=2, row=0)
-        ttk.Button(mainframe, text='开始', command=self.filewriter, width=4).grid(column=1, row=1, sticky=(tkinter.W, tkinter.E))
+        self.b_choose = ttk.Button(mainframe, text="路径选择",command=self.select_folder)
+        self.b_choose.grid(column=2, row=0)
+        self.b_start = ttk.Button(mainframe, text='开始', command=self.filewriter, width=4)
+        self.b_start.grid(column=1, row=1, sticky=(tkinter.W, tkinter.E))
         ttk.Button(mainframe, text='Quit', command=root.destroy, width=4).grid(column=2,row=1, sticky=(tkinter.W, tkinter.E))
         self.loglb = tkinter.StringVar()
         ttk.Label(mainframe,textvariable=self.loglb).grid(column=0,columnspan=3,row=2)
@@ -37,6 +39,8 @@ class DealFolder:
             res = func(self, *args, **kwargs)
             end = time.perf_counter()
             self.loglb.set("处理耗时{}秒\n处理完成".format(end-start))
+            self.b_start.state(['!disabled'])
+            self.b_choose.state(['!disabled'])
             return res
         return wrapper
 
@@ -44,6 +48,8 @@ class DealFolder:
     def filewriter(self):
         deal_path = self.path.get()
         if deal_path != '':
+            self.b_start.state(['disabled'])
+            self.b_choose.state(['disabled'])
             a = os.walk(deal_path)
             res = []
             self.loglb.set('处理中')
