@@ -22,5 +22,5 @@ preferences-settings：Font families，第一个英文，第二个中文，第�
 第二个是下载的方正宋刻本秀楷，注意字体的名称不是预览里面的，要去属性里面看详情的title，或者windows/fonts里面安装的名字
 第三个也可以不设，在features-terminal里面可以专门设置终端的字体，当然，也要是等宽类型
 ## markdown
-+ markdown all in one 和 markdown preview enhanced必要，以便预览，~~扩展刚装不响应（比如浏览器中打开之类的），关掉重开一下~~**发现不是没响应，是需要文件保存~以及要注意符号的使用呀，比如感叹号，波浪线等等**
++ markdown all in one 和 markdown preview enhanced必要，以便预览，~~扩展刚装不响应（比如浏览器中打开之类的），关掉重开一下~~**发现不是没响应，是需要文件保存~以及要注意符号的使用呀，比如感叹号，波浪线等等**如果格式标记符左右也是标点，使用空格让它正确发挥作用。
 + 分级列表怎么才输入和输出都好看还没有学会
