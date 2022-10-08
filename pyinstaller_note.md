@@ -23,8 +23,10 @@ virtualenv ***
 2. 虚拟环境装包
 **一定要装pyinstaller**~~~不然又会去本地的Python第三方库里打包
 还要注意代码里有没有因为自动补全，过程中不小心加进去的库，比如不小心从哪里揪进去个`test`、`matplotlib`什么的
+如果用了pandas写excel文件，要把openpyxl也装上
+pip freeze可以看到已安装的包和版本
 
-3. 打包
+1. 打包
 ```shell
 pyinstaller --clean --onefile -F ***.py
 ```
@@ -36,6 +38,9 @@ pyinstaller -F -w --clean --onefile .\2022-10-05\test_filelog.py
 
 4. 做界面
 据说如果是`pyqt5`的话打包也贼大，小玩意儿就用`tkinter`代替了，所以速学一下~
+pyqt都到6了~~
 
 5. Python解释器
 虚拟环境退出，vscode的终端或者jupyter可能还没有反应过来-_-||，所以`ctrl`+`shift`+`p`，`interpreter`搜一下就可以选解释器了，选回去~
+
+替代：`nuitka`~~待研究
