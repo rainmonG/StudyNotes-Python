@@ -62,6 +62,11 @@ f['padding'] = 5 # 5 pixels on all sides
 f['padding'] = (5,10) # 5 on left and right, 10 on top and bottom
 f['padding'] = (5,7,10,12) # left: 5, top: 7, right: 10, bottom: 12
 ```
+用了grid的话，指定窗口长宽后避免几何图形管理器自动调回去
+```python
+#固定容器大小
+frmLT.grid_propagate(0)
+```
 # Label
 动态显示变量：`textvariable`属性，赋一个`StringVar`类实例变量，`get`或`set`方法读取或赋值
 显示图＋字：`compound`配置
