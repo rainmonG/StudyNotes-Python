@@ -1708,3 +1708,524 @@ B、将非强相关的用例进行拆分
 C、识别无关细节，并将其从测试中移除
 D、使用 bool 运算符替换位运算符
 参考答案：选BC。D肯定跟断言没啥关系。
+
+8	软件建模习题
+________________________________________
+
+
+#####软件建模#####
+1：泛化是类与类的关系（继承），实现是接口与类的关系（实现），关联类似于类与成员
+变量的关系（拥有关系），依赖类似于类与临时变量的关系（使用关系），组合是整体与局
+部的关系，聚合是整体与个体的关系。
+2：通过模型指导软件系统的具体实现。模型并不是软件系统的一个完备表示，而是所研究
+的系统的一种抽象。
+3：人-教师-教授是依赖关系，实线箭头，循环链表-队列是聚合关系，实线空菱形。
+4：组件图和部署图可以结合在一起，描述哪些组件在哪些节点上运行
+5：概念建模阶段不需要关心实现。
+6：一个经理可以管理多个雇员，一个雇员只能被一个经理管：雇员和经理的方框直线连接，
+雇员标注 1..n，经理标识 1。
+7：UML 适用于描述复杂算法的执行流程：可以使用活动图。
+8：时序图中：虚线是组件的生命线。
+
+
+错误的描述 1：组件图(Component Diagram)描述系统中组件之间的物理关系
+错误的描述 2：概念建模用于定义需要软件管理和处理的数据/信息，以及这些信息之间的关系，一般用数据视图表示，如类图，活动图。
+错误的描述 3：软件建模是通过不同视角，采用不同的模型图对一个软件系统进行的完整描述
+ 
+1      大纲
+科目：软件设计与重构
+可信设计
+1)    掌握常见软件设计中各个领域应用的安全威胁及对应的安全设计方法，包括身份和访问控制管理、密钥管理、会话管理、安全设计、隐私保护、密码学算法应用等;2)    掌握常见的安全设计原则及安全设计方法，包括安全开发设计指导规则(HCSEC Golden Rules)、安全设计原则、安全设计模式、威胁建模工程方法（ASTRIDE）等9	2      需求分析
+1)    掌握软件需求分析基本概念、流程、分析方法、需求分析的质量度量准则、系统资源占用分析方法；2)    理解需求分析需要关注的场景和维度、需求分析的场景和DFX识别方法3)    掌握需求分析的原则， ACT15立方架构设计原则、了解业界先进的架构和方案、业务领域国际标准/规范4)    掌握常见的软件架构和设计方法、常见的设计模式和架构模式软件建模和设计模式应用
+1)    掌握常见软件建模方法及设计模式的应用，如封装、数据抽象、分类、聚集、概括、状态机模式、DSL、创建型模式、结构型模式、行为模式重构分析
+1)    掌握软件设计及代码实现的宏观层面和微观层面的坏味道识别与处理方法，包括模块内代码、模块组件/服务间接口与代码设计；开发者测试
+测试设计（含理念、方法、用例设计）1)    掌握测试基础理论与设计方法，包括单元测试、集成测试、系统测试2)    掌握组合测试设计方法、可靠性测试方法、性能测试方法、可测试性分析与设计方法3)    掌握用例质量评估方法、测试框架质量分析测试实现与执行1)    掌握白盒测试的框架搭建及应用2)    MOCK概念与使用方法（C/C++)3)    测试用例与环境解耦的方法(可独立执行，不依赖于外部条件)4)    覆盖率的分类(函数、代码行、分支覆盖率)5)    掌握测试框架扩展原则（易用性、稳定性、高效性）6)    掌握重构测试准备的基本原理与设计方法7)    测试代码重构常用技能方法开发者安全测试1)    理解DT-Fuzz基本原理，掌握Fuzz用例设计、编写和执行，熟悉相关工具的使用、FUZZ工具测试报告分析等2)    掌握程序异常行为分析、地址消毒报告分析、问题复现方法、优化测试用例方法等目的：
+（1）       光背题  题目可能会变。要建立基础概念，理解+记忆
+（2）       建立基础概念需要时间消化，所以有空就看看
+（3）       代码题不要心慌，先看选项，针对性分析
+
+ 
+10	3      UML 软件建模
+10.1	3.1      概念
+面向对象的建模标准，即UML(Unified Modeling Language)统一建模语言， 是面向对象开发中一种通用的图形化建模语言.(内部能对应到代码，比如接口/方法依赖/调用/类继承等)
+10.2	3.2      分类
+（蓝底代表静态模型，灰底代表动态模型，红字代表重点掌握。）10.2.1	3.2.1        类结构：
+长方形垂直地分为三层，以此放置类的名称、属性和方法。属性和方法都需要标注可见性符号，+代表public，#代表protected，还可以用冒号:表明属性的类型和方法的返回类型。
+关系：类关系从强到弱依次是：继承（泛化）>实现>组合>聚合>关联>依赖
+举例：https://www.awaimai.com/patterns/uml考点：
+(1)    关联关系有四种：双向关联、单向关联、自关联、多重数关联双向的关联可以有两个箭头或者没有箭头，单向的关联或自关联有一个箭头
+在多重性关系中，可以直接在关联直线上增加一个数字，表示与之对应的另一个类的对象的个数。
+•	1..1：仅一个
+•	0..*：零个或多个
+•	1..*：一个或多个
+•	0..1：没有或只有一个
+•	m..n：最少m、最多n个 (m<=n)(2)    .UML，一个Manager可以管理1到多个Employee，一个Employee仅能被一个Manager管理。其关系类图是怎么样的？ A(3)    B从A继承，一个C与一个到多个D组成B，关系类图是什么样的？(4)    10.ULM类图中整体与局部的关系 D
+A 泛化
+B 依赖
+C 实现
+D 聚合
+10.2.2	3.2.2        顺序图
+参与者是对象，不是类； 过程是消息流，不是数据流。(1)    有以下时序图，描述正确的是A．“曹操”“刘备”“诸葛亮”是类，不是对象 （反了）
+B．“攻击”动作会调用“曹操”中的方法（调用刘备中的“怎么办”）
+C． 图中虚线表示生命线，对象在这一时期内存在
+D．图中调用顺序没有先后关系（有）
+(2) 软件建模是通过不同视角，采用不同的模型图对一个软件系统进行的完整描述（错误）
+答案：通过模型指导软件系统的具体实现。模型并不是软件系统的一个完备表示，而是所研究的系统的一种抽象。
+(2)    以下属于动态模型图的是（BD）
+A: 类图 B: 顺序图 C: 部署图 D: 状态图
+(3)    用于描述两个对象之间消息交互的UML图是（C）
+A: 用例图 B: 类图 C: 顺序图 D: 组件图
+(4)    （多选）类图的6种关系中，比聚合关系强的是（）BC
+A: 依赖 B: 泛化 C: 组合 D: 关联
+(5)    用例图中的Include关系是对应的UML四个关系中哪一种关系（D）
+A: 关联 B: 泛化 C: 实现 D: 依赖
+(6)    以下关系表达方式正确的是（AD）11	4      开发者测试
+11.1	4.1      概述
+测试是验证的过程，在可以接受的出错风险下，投入最低的测试工作量，测试的目的是获得最大收益。
+√ 测试是发现缺陷的过程、减少软件总成本的过程。（正确）
+× 测试是证明软件正确的过程、证明软件没有缺陷的过程、建立软件发布信心的过程。（错误）
+  （单选）正交四原则要求通过所有测试？
+A.正确
+B.错误
+答案：A正确
+解析：正交四原则是指简单设计的四个基本原则，包括1）通过所有测试 2）尽可能消除重复 3）尽可能清晰表达 4）更少的代码元素
+11.2	4.2      覆盖方法：注意： 判定覆盖：判定覆盖只关心判定表达式的值（真/假），而条件覆盖涉及到判定表达式的每个条件的值（真/假）。在逻辑电路中，判定覆盖可以保证一个逻辑门的翻转，二条件覆盖可以保证这个逻辑门的每一个输入的翻转。
+判定覆盖和条件覆盖中间不存在 充分/必要 的逻辑关系
+举例，对于  if (x > 5 && y < 10)  
+（x=6,y=9）  (x=4,y=9)   可以保证判定覆盖；
+(x=6,y=11)   (x=4,y=9)   可以保证条件覆盖；1.        void someFuntion() {
+2.               // other code
+3.        if (x > 5 && y < 10) {
+4.            doSomething();
+5.            s = “a”;
+6.        }
+7.         
+8.        if (x == 2 || z > 15) {
+9.            s = “bb”;
+10.     }
+11.     }
+12.      (1) 为以下流程图所示的程序段设计一组测试用例，下面（）用例满足判定/条件覆盖标准的最小的测试数据组  C
+   
+A. (X=0, Y=0); (X=1,Y=0); (X=15, Y=9); (X=17, Y=6)
+B. (X=0, Y=0); (X=1, Y=1); (X=15,Y=9); (X=17, Y=11)
+C. (X=0, Y=0); (X=17, Y=11)
+D. (X=0, Y=0); (X=1, Y=0); (X=17, Y=6)
+(2) 对下图所示流程图采用白盒测试方法进行测试，若要满足路径覆盖，则至少需要（）个测试用例？ D 6(3) 测试和外部环境分析，不能依赖外部环境，否则测试用例随机失败，符合测试的什么特征（）A
+A. 可重复性
+B. 隔离型
+C、一致性
+11.3	4.3      性能测试
+(1) 有四次请求耗时分别为：10ms，1000ms，100ms，2ms，计算TP50、TP90
+1、将请求时延按照升序排列: [2ms,10ms.100ms,1000ms]
+2、TP50 = 请求数 * 50% = 4*50% =2
+3、取第二个请求时延 10ms，即TP50 可以满足百分之50网络请求最低耗时为 10ms
+4、TP90 = 请求数 * 90% = 4*90% =3.6 进位取整 为4
+5、取第四个请求时延 10ms，即TP90 可以满足百分之90网络请求最低耗时为 1000ms
+(2) 性能测试的时候需要观察（）指标 ABCD
+A. 资源指标（CPU、内存、文件句柄等）
+B. 业务指标（响应时延、呼叫成功率等）
+C. 数据库指标（CPU占用率、内存占用率、SQL读写速度等）
+D. 真实用户体验（对于端到端体验类业务）
+12	5      代码坏味道
+12.1	5.1      Duplicated Code（重复的代码）
+如果你在一个以上的地点看到相同的程序结构，那么可以肯定的：设法将他们合而为一，程序会变得更好。
+12.2	5.2      Long Method（过长函数）
+12.3	5.3      Large Class（过大类）
+12.4	5.4      Long Parameter List（过长参数列）
+入参数建议不大于5个。通过构造结构体入参，或者函数拆分解决。
+12.5	5.5      Divergent Change（发散式变化）
+多种不同领域的原因引起同一个类的变动。原因是类的职责过多不单一。
+考虑拆分子类。
+13.     class Drive()
+14.     {
+15.        DriveCar()；
+16.        DrivePlane()；
+17.        DriveBoat()；
+18.     }
+无论car、plane、boat发生变化，这个大类就需要修改。所以最好对三个领域都简历自己的子类，修改的时候不会影响其他类。
+12.6	5.6      Shotgun Surgery（散弹式修改）
+遇到某种变化，需要在不同类中修改。原因：类职责不明确。修改方法：把相同功能的方法抽象到一个类中。
+  面向对象设计的基本原则中的开闭原则指出软件要对扩展开放，对修改关闭。违反开闭原则可能造成的坏味道有（）BD
+A. 基本类型偏执(Primitive Obsession)
+B. 散弹式修改(Shotgun Surgery)
+C. 过长参数列表(Long Parameter List)
+D. 发散式变化(Divergent Change)12.7	5.7      Feature Envy（依恋情结）
+函数对某个类的兴趣高过对自己所处类的兴趣，通常焦点便是数据，某个函数为了计算某个值，从另一个对象那调用几乎半打的额取值函数。
+将数据和处理数据的方法放在一起。
+12.8	5.8      Data Clumps（数据泥团）（从具体意义考虑）
+两个类中相同的字段、许多函数签名中相同的参数。这些总是绑在一起出现的数据真应该拥有属于它们自己的对象。意义强相关的数据没有建造一个数据容器。
+12.9	5.9      Primitive Obsession（基本型别偏执）（从数据类型考虑）
+对象的一个极大的价值在于：它们模糊（甚至打破）了横亘于基本类型数据和体积较大类之间的界限。
+很多参数都是用基本类型：
+19.     public class Employee
+20.     {
+21.          public Employee(string firstName, string lastName, int iD,string contactCellNo,string ssn){
+22.                 FirstName = firstName;
+23.                 LastName = lastName;
+24.                 ID = iD;
+25.                 PhoneNumber = contactCellNo;
+26.                 SSN = ssn;
+27.        }
+28.          public string FirstName { get; set; }    
+29.     public string LastName { get; set; }    
+30.     public int ID { get; set; }    
+31.     public string PhoneNumber { get; set; }    
+32.     public string SSN{ get; set; }}
+将他们抽象成一个对象，对象里面set get操作
+下列函数重构方法正确的是，（基本类型偏执）B
+(1) void setPoint(int x, int y, int z)
+(2) void setColor(int x, int y, int z, int red, int green, int blue)
+(3) void connectPoint(int srcX, int srcY, int srcZ, int destX, int destY, int destZ)A．对于setColor函数，应该将所有参数变成一个对象传入，void setColor(setColorParam)
+B． 对于connectPoint函数，应该将参数进行封装传入，void connectPoint(Point src, Point dest)
+C．
+D． 
+12.10	5.10   Switch Statements（switch惊悚现身）
+面向对象程序的一个最明显特征就是：少用switch（或case）语句。从本质上说，switch语句的问题在于重复（duplication）。你常 会发现同样的switch语句散布于不同地点。如果要为它添加一个新的case子句，你必须找到所有switch语句并修改它们。面向对象中的多态 （ploymorphism）概念可为此带来优雅的解决办法。
+大多数时候，一看到switch语句你就应该考虑以[多态]来替换它。问题是多态该出现在哪儿？switch语句常常根据type code（型别码）进行选择，你要的是[与该type code相关的函数或class]。所以你应该所用Extract Method（110）将switch语句提炼到一个独立函数中，再以Move Method（142）将它搬移到需要多态性的那个class里头。此时你必须决定是否使用Replace Type Code with Subclasses（223）或Replace Type Code with State/Strategy（227）。一旦这样完成继承结构之后，你就可以运用Replace Conditional with Polymorphism（225）了。
+如果你只要在单一函数中有些选择事例，而你并不想改动它们，那么[多态]就有点杀鸡用牛刀了。这种情况下Replace Parameter with Explicit Methods（285）是个不错的选择。如果你的选择条件之一是null，可以试试Introduce Null Object（260）。
+  switch语句，为了考虑日后的多个case的扩展，哪些重构方法好？
+a.采用if—else，5个一组避免圈复杂度过高，抽取函数出来 ---- 这个不选
+b.采用设计模式
+c.采用配置表的方式
+  配置表的一个例子：
+switch  label:
+case LABLE1:
+       FUNC1
+       break
+case LABEL2
+       FUNC2
+       break
+       …
+变成：
+table[]={
+{ LABLE1，FUNC1 }
+{ LABLE2，FUNC2 }
+…
+}for(;;)
+{
+       if label == LABELn
+              FUNCn
+              break;
+}
+   消息处理程序，有公告消息头格式，。。。，目前代码使用switch语句，要重构 ，为了消除switch语句，降低复杂度，方便扩展：CD
+A、职责链
+B、switch改成if else
+C、表驱动
+D、类继承、工厂12.11	5.11   Parallel Inheritance Hierarchies（平行继承体系）
+散弹式修改的一个特殊例子，为某个类增加一个子类，必须也为另一个类相应增加一个子类。
+12.12	5.12   Lazy Class（冗赘类）
+如果一个类的所得不值其身价，它就该消失。类中包含几乎没用的组件。
+12.13	5.13   Speculative Generality（夸夸其谈未来性）
+为了不确定的未来扩展，过分增加预留属性、接口、中间层。
+12.14	5.14   Temporary Field（令人迷惑的暂时值域）
+  局部变量有哪些重构方法
+【在不影响功能的情况下把多个同种类型的局部变量合成一个 错的】12.15	5.15   Message Chains（过度耦合的消息链）
+如果你看到用户一个对象请求另一个对象，然后后者请求另一个对象，然后再请求另一个对象这就是消息链。
+Employee->EmployeeConfig->Config
+Employee ->Config
+12.16	5.16   Middle Man（中间转手人）
+12.17	5.17   Inappropriate Intimacy（狎昵关系）
+12.18	5.18   Alternative Classes with Different Interfaces（异曲同工的类）
+12.19	5.19   Incomplete Library Class（不完美的程序库类）
+12.20	5.20   Data Class（纯稚的数据类）
+12.21	5.21   Refused Bequest（被拒绝的遗贈）
+12.22	5.22   Comments（过多的注释）
+注释本身并不是坏事。但是常常有这样的情况：一段代码中出现长长的注释，而它之所以存在，是因为代码很糟糕。如果你觉得一个代码片段没有注释就无法理解，请先尝试重构，试着让所有注释都变得多余。
+  以下代码，存在哪些坏味道（多选）：BC
+33.     public String getType(String i) {
+34.         StringBuilder k = new StringBuilder();
+35.         for (int j = 0; j < i.length(); j++) {
+36.             // 判断第一个数字是否为负数
+37.             if (j == 0) {
+38.                 k.append(" ");
+39.             } else {
+40.                 if (i.charAt(0) == '=') {
+41.                     k.append(" = ");
+42.                 } else {
+43.                     k.append(String.valueOf(i.charAt(0)));
+44.                 }
+45.             }
+46.         }
+47.         return k.toString();
+48.     }
+A. 依恋情结。对参数i作了大量的charAt操作。
+B. 烂用注释，注释没有自注释，并且注释内容与实际意义不符。
+C. 命名不规范，不能表达实际意思。
+D. 过度耦合消息链。反回值过度依赖入参细节。
+  给出一个代码，识别坏味道 cd
+replaceMinusOper(String oper)
+{
+       没记住，大概是把-号用+*/替代  之类的。
+}
+a.数据泥团
+b.基本类型偏执
+c.变量命名不好
+d.注释不好
+  关于代码注释下列说法哪些是正确的（）ACD
+A. 对于某些确实难以表意清晰的代码，允许通过注释来澄清意图，例如某种复杂算法。
+B. 在当前交付版本无法提供的功能，在代码中通过todo注释先进行标记，在下一个交付版本再实现。--本版本完成
+C. 用代码本身来阐述意图。
+D. 警示其他程序员操作可能会出现的某种后果。13	6      重构
+确定重构方法之前，要先明确坏味道，才能对症下药
+重构首先要逻辑清楚，其次才是视觉清楚。
+技巧：先看选项，判断选项的逻辑（单选与互斥的选项，必选其中之一）。明显错误的，一眼能看出来的不要选 绝对肯定或者否定语气的会有问题。  代码有问题，需要重构的是：B
+49.     a.getRecord
+50.     Record getRecodr(String name) {
+51.         Item it = findItem(name);
+52.         Record rd ;
+53.         if (it != null) {
+54.             rd = it.getRecord();
+55.         }
+56.         return null;
+57.     }
+58.     b.getNode  ------- get函数里new了一个新节点
+59.     Node getNode(String name) {
+60.         Node nd = findNode(name);
+61.         if (nd==null) {
+62.             nd = new Node();
+63.         }
+64.         return nd;
+65.     }
+66.     c.setNum
+67.     d.getNum
+  某产品现有代码中有一个超大函数，有850行代码18个参数和31个局部变量，以下手法中可以直接减少该函数代码量并减少参数和局部变量个数的有哪些() AD
+A. 通过提炼函数（Extract Method）的手法，提取一批功能内聚、名称通俗易懂的函数
+B. 为了提高可读性，决定引入解释性变量（Introduce Explaining Variable），把其中某些复杂表达式结果放到命名良好的临时变量中
+C. 将函数内联化（Inline Method）将封装不良的下层函数直接展开到当前函数中
+D. 引入参数对象（Introduce Parameter Object），把参数封装成一个或几个类，将参数封装成对象后提高了代码的可读性，并且该参数对象也可以供多个方法调用，以后如果增加删除参数，方法本身不需要修改，只需要修改参数对象就可以
+  关于代码格式，下列说法错误的是（）B
+A. 每行代码展现一个表达式或一个子句，每组代码行展示一条完整的思路，这些思路应该用空白行隔离开
+B. 让“代码能工作”是专业开发人员的首要要求，代码格式的要求尽量交给自动转换工具去处理，开发人员优先将代码功能开发完成
+C. 代码格式不可忽略，必须严肃对待。代码格式关于沟通，而沟通是专业开发者的头等大事
+D. 同一个文件内一个函数调用了另一个，应该把他们尽量放在一起，方便阅读
+  仔细阅读下面代码，考虑下面的重构思路，哪些可以采纳：AB
+68.     ULONG OlcCfgProc( VOID* recvMsg )
+69.     {
+70.         ULONG ret;
+71.         ULONG paraNum = 0;
+72.         ULONG objID = 0;
+73.         ULONG loop;
+74.         ULONG threshold ;
+75.      
+76.         /*从消息中提取参数*/
+77.         paraNum = GetAllParaNum(recvMsg);
+78.         for ( loop = 0; loop < paraNum; loop++ ) {
+79.              objID = GetParaID( recvMsg, loop );
+80.              switch ( objID ) {
+81.                   /* 获取漏桶配置阈值 */
+82.                   case OLC_BUCKET_CONFIG_VALUE:
+83.                     threshold = GetParaULONGVal( recvMsg, loop );
+84.                     break;
+85.      
+86.                   default:
+87.                     return VOS_ERROR;
+88.              }
+89.          }
+90.      
+91.         if ( threshold > 100 ) {
+92.             OutString("error");
+93.             return VOS_ERROR;
+94.         }
+95.      
+96.         /* 设定漏桶配置阈值 */
+97.         ret = SetBucketConfig(threshold);
+98.         if ( ret != VOS_OK ) {
+99.             OutString("error");
+100.          return VOS_ERROR;
+101.      }
+102.   
+103.      return VOS_OK;
+104.  }
+A. 该函数重构时可分解为2个主要的子函数，分别是：参数提取函数和配置处理函数
+B. 对threshold的有效值判断应该放到SetBucketConfig函数内部去完成
+C. SetBucketConfig函数随着功能扩展，还会增加其他参数配置，此时可扩展一个resv输入参数项进行预留
+D. 函数中两处使用OutString函数，可以提炼到一个函数中，供返回应用
+  下面对于重构的理解错误的是（ ）C
+A. 重构时要保证代码修改的安全性，保持业务功能不变。
+B. 在修改问题时重构，修改问题时适当重构可以使修改问题更简单，并且更容易理解减少出错的可能，并且有问题回归测试进行质量保证。
+C. 重构不能改变模块内的函数调用关系。
+D. 在增加功能的时候重构，重构新增功能涉及到的相关代码可以简化新增功能的修改，并且随功能测试验证可以保证重构质量。
+  从提升代码可读性角度看，下面代码段哪个重构方法最好（）A
+1.        long DisabilityAmount()
+2.        {
+3.            if (seniority < START)
+4.                return 0;
+5.            if (monthsDisabled > END)
+6.                return 0;
+7.            if (isPartTime)
+8.                return 0;
+9.            // compute the disability amount
+10.     }
+11.     A.
+12.     long DisabilityAmount()
+13.     {
+14.         if (IsNotEligibleForDisability()) {
+15.             return 0;
+16.         }
+17.      
+18.         // compute the disability amount
+19.     }
+20.      
+21.     bool IsNotEligibleForDisability()
+22.     {
+23.         return ((seniority < START) || (monthsDisabled > END) || (isPartTime));
+24.     }
+25.     B.
+26.     long DisabilityAmount()
+27.     {
+28.         if (seniority < START)
+29.             return 0;
+30.      
+31.         if (monthsDisabled > END)
+32.             return 0;
+33.      
+34.         if (isPartTime)
+35.             return 0;
+36.      
+37.         // compute the disability amount
+38.     }
+39.     C.
+40.     long DisabilityAmount()
+41.     {
+42.         if (seniority < START)
+43.         {
+44.             return 0;
+45.         }
+46.         if (monthsDisabled > END)
+47.         {
+48.             return 0;
+49.         }
+50.         if (isPartTime)
+51.         {
+52.             return 0;
+53.         }
+54.         // compute the disability amount
+55.     }
+56.     D.
+57.     long DisabilityAmount()
+58.     {
+59.         if (seniority < START) {
+60.             return 0;
+61.         }
+62.         if (monthsDisabled > END) {
+63.             return 0;
+64.         }
+65.         if (isPartTime) {
+66.             return 0;
+67.         }
+68.      
+69.         // compute the disability amount
+70.     }
+  （单选）有效代码超过（）行的函数就是过长函数?
+A. 30 B. 20 C. 50 D.100
+答案：C
+  一个函数的参数个数最好不要超过（）个？
+A. 4 B. 5 C. 6 D. 3
+答案：B
+  （多选）60多种重构手法，基本手法包含哪几种（）？
+A. 重命名(rename)
+B. 提炼（extract）
+C. 内联（inline）
+D. 移动（move）
+答案：ABCD
+  对于下面根据单板状态获取模板模式的函数，存在嵌套过深的问题，可以使用（）重构手法降低嵌套深度。A
+71.     int getTemplateMode(Board board) {
+72.         double result;
+73.         if (board.isOnline) {
+74.             if (board.isSpecialMode)  {
+75.                 result = getSpecialMode(board.type);
+76.             } else {
+77.                 if (board.isBackup) {
+78.                     result = getTemplateModeFromActiveBoard(board.slot);
+79.                 } else {
+80.                     result = getNormarlMode(board.type);
+81.                 }
+82.             }
+83.         } else {
+84.             result = TEMP_MODE_OFF_LINE;
+85.         }
+86.         return result;
+87.     }
+A. 使用卫语句，代码改为类似如下: （https://blog.csdn.net/u012810020/article/details/51821087）
+88.     int getTemplateMode(Board board) {
+89.     if (!board.isOnline) {
+90.         return TEMP_MODE_OFF_LINE;
+91.     }
+92.     …
+B. 使用分解条件表达式(Decompose Conditional),将判断条件拆分为一个个独立的函数
+C. 采用合并条件表达式(Consolidate Conditional Expression)，将行为一致的条件判断合并
+D. 通过多态取代条件式,定义一个基类，每个分支都是一个子类，将实现放在子类中
+  一个父类被3个子类继承，随着代码的不断修改，父类中的某个方法只被其中一个子类S使用，这时候比较合理的重构方法是（）B
+A. 子类S与父类关系密切，所以将子类S合并到父类
+B. 将该方法移动到子类S中
+C. 修改该方法名字，并在名字中显式标明只用于子类S场景。
+D. 在父类中将该方法设置为private属性，并将S设置为父类的友元类，使得只有S可以访问该方法
+注意：所有加flag标志位的选项都大概率有问题的，因为违反了高内聚低耦合的原则。
+  关于重构方法，下列说法错误的有( ) B
+A. 某个类的getter实例方法，既返回实例状态值，又修改了实例状态。这样违背了命令与查询分离的原则，在使用过程中对于方法的调用者来说，很容易因为设计与职责不符，造成意外的状态变更，产生Bug。所以需要将状态修改的代码搬移出去成为单独的状态变更方法，实现命令与查询分离。
+B. 如果父类中的某个方法只有少数子类使用，那么可以将这个方法下移到相关的子类中去（只有一个）
+C. 即使少数子类有代码和功能相同的方法，也必须将这些方法上移到父类中去。
+D. 一个函数的某个形参在当前没有被函数内的任何代码使用，就应该去掉它
+少数子类方法相同则一定要上移到父类。
+  依恋情结(Feature Envy)的含义是，一个模块/class 的函数，直接调用了另一个模块/class的大量数据，访问自己的数据少，访问其他模块/class的数据多。这样就违反了“数据和操作封装在一起”的原则，关于有依恋情结的代码重构策略，下列描述错误的是（）A
+A. 可通过字段上移(Pull Up Field)的方式将数据提到父类中。（重构的一个原则就是方法上移，数据下移）
+B. 如果仅仅是函数的部分代码访问另一个对象的数据，运用提炼函数(Extract Method) 将这部分代码移到独立的函数中。
+C. 解决依恋情结的基本原则是将总是一起变化的东西放在一块儿。
+D. 如果一个函数明显应该被移到另一个地方，可运用搬移函数(Move Method)。
+  下面代码重构，用的代码重构方法是（）B
+原代码：
+1.        class Employee
+2.        {
+3.            protected String _name;
+4.            protected String _id;
+5.         
+6.        }
+7.        class Manager extends Employee
+8.        {
+9.            private int _grade;
+10.         public Manager(String name, String id, int grade)
+11.         {
+12.             _name = name;
+13.             _id = id;
+14.             _grade = grade;
+15.         }
+16.     }
+17.      
+18.     class Enginner extends Employee
+19.     {
+20.         public Enginner(String name, String id)
+21.         {
+22.             _name = name;
+23.             _id = id;
+24.         }
+25.     }
+26.   重构后代码:
+27.     class Employee
+28.     {
+29.         protected String _name;
+30.         protected String _id;
+31.      
+32.         protected Employee(String name, String id)
+33.         {
+34.             _name = name;
+35.             _id = id;
+36.         }
+37.     }
+38.      
+39.     class Manager extends Employee
+40.     {
+41.         private int _grade;
+42.         public Manager(String name, String id, int grade)
+43.         {
+44.             super(name, id);
+45.             _grade = grade;
+46.         }
+47.     }
+48.     class Enginner extends Employee
+49.     {
+50.         public Enginner(String name, String id)
+51.         {
+52.             super(name, id);
+53.         }
+54.         .......
+55.     }
