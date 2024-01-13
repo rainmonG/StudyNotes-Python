@@ -1,0 +1,6 @@
+import requests
+from bs4 import BeautifulSoup
+import urllib.parse
+
+token1 = "MjY1NzYxNzF8NWI1NTUyOTI2MDY0ZWViNGVjMzU4OGE0YjJkMGJjOWV8fHx8MjU5MjAwMHwxfHx85pmL5rGf55So5oi3fDF8bW9iaWxlfDF8MHx8; bbsnicknameAndsign=2%257E%2529%2524rainmonG; bbstoken=MjY1NzYxNzFfMF84N2MwM2YxZDRiMzg4NGVmZTM0NzJhZmFiMzFhMzFiN18xX19fMQ%3D%3D; JJEVER=%7B%22nicknameAndsign%22%3A%222%257E%2529%2524rainmonG%22%2C%22foreverreader%22%3A%2226576171%22%2C%22desid%22%3A%22+wjJGnLtKbrIuhMw2Rq6j1rhv5Gs/l75%22%2C%22sms_total%22%3A0%2C%22lastCheckLoginTimePc%22%3A1679222490%2C%22shumeideviceId%22%3A%22WHJMrwNw1k/EmoPuC7oJdbs65Hy26CKBez3P+qg2g2Ih70tHKY4CfD2ya+L6zejwoCDSkCqlSeSn2wbjqtBGY96SXPEp3FkYAdCW1tldyDzmQI99+chXEiibOVp1m1iU+9lCUKKcsmkR3KAhq3N/faTYmmmXo8LlTkQE5YcNLqNriNYPfoOP/btWJtVOAJZe/FRRuSg/X1FURTkAd7H/eWpm5uOLM6bEkFggDkOZJSJqebhn3WVcVqTTx1ufkULo1fUGgIqCuSLQ%3D1487582755342%22%2C%22fenzhan%22%3A%22by%22%7D; testcookie=yes; timeOffset_o=2368.699951171875; Hm_lvt_bc3b748c21fe5cf393d26c12b2c38d99=1686842354; Hm_lpvt_bc3b748c21fe5cf393d26c12b2c38d99=1686842354"
+print(urllib.parse.unquote(token1).decode('utf8'))
