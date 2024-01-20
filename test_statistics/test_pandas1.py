@@ -1,7 +1,7 @@
 """
 @Time : 2024/1/20 18:35
 @Author : rainmon
-@File : test_pandas.py
+@File : test_pandas2.py
 @Project : StudyNotes-Python
 @feature : 
 @description：
@@ -34,10 +34,15 @@ def test(chap):
 
 
 def data_a(n):
+    """
+
+    :param int n:
+    :return:
+    """
     df = pd.DataFrame({'a': np.arange(10), 'b': [chr(i + 50) for i in range(10)]})
     if n == 1:
-        print(df)
         df1 = df[:]
+        print(df1)
         print(df['a'].nunique())
 
 
