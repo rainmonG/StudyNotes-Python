@@ -16,7 +16,7 @@ import tkinter as tk
 import tkinter.filedialog as tf
 
 
-class DealFolder:
+class TablesCombo:
     """
     合并同名表格或合并一个文件夹内所有表格
     """
@@ -24,36 +24,35 @@ class DealFolder:
     def __init__(self, root):
         root.title('表格处理')
         root.geometry("600x300+20+50")
-        mainframe = tk.Frame(root, width=500, height=300, padx=3, pady=3)
-        mainframe.grid(column=0, row=0, sticky='nwse')
+        mainframe = tk.Frame(root, padx=3, pady=3)
+        mainframe.grid(column=0, row=0, sticky='nswe')
         # mainframe.grid_propagate(0)
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
         self.path = tk.StringVar()
         tk.Label(mainframe, text="目标路径").grid(column=0, row=0)
-        tk.Label(mainframe, textvariable=self.path, width=60, relief='ridge').grid(column=1, row=0)
+        tk.Label(mainframe, textvariable=self.path, width=60, relief='ridge').grid(column=1, row=0, columnspan=3)
         self.b_choose = tk.Button(mainframe, text="路径选择", command=self.select_folder)
-        self.b_choose.grid(column=2, row=0)
+        self.b_choose.grid(column=4, row=0)
         self.mod = tk.IntVar(value=1)
         self.mod_choice1 = tk.Radiobutton(mainframe, text="合并文件夹内所有表格", variable=self.mod, value=1)
         self.mod_choice1.grid(column=1, row=1)
         self.mod_choice2 = tk.Radiobutton(mainframe, text="分开合并文件夹内所有同名表格", variable=self.mod, value=2)
-        self.mod_choice2.grid(column=2, row=1)
-        self.b_start = tk.Button(mainframe, text='开始处理', command=self.filewriter, width=4)
-        self.b_start.grid(column=1, row=2, sticky='ew')
-        tk.Button(mainframe, text='Quit', command=root.destroy, width=4).grid(column=2, row=2, sticky='ew')
-        self.loglb = tk.StringVar()
-        self.loglb.set("请选择要收集对端关系的数据文件夹路径，选定后点击开始处理")
-        tk.Label(mainframe, textvariable=self.loglb).grid(column=0, columnspan=3, row=2)
+        self.mod_choice2.grid(column=3, row=1)
+        self.b_start = tk.Button(mainframe, text='开始处理', command=self.filewriter)
+        self.b_start.grid(column=1, row=2)
+        tk.Button(mainframe, text='Quit', command=root.destroy, width=4).grid(column=3, row=2)
+        tk.Label(mainframe, text="处理日志").grid(column=0, row=3)
+        # 滚动条初始化（scrollBar为垂直滚动条，scrollBarx为水平滚动条）
+        scroll_bar = tk.Scrollbar(mainframe)
+        scroll_bar.grid(row=4, column=5, sticky='ns')
+        self.loglb = tk.Text(mainframe, width=80, height=10, relief='ridge', wrap='word', yscrollcommand=scroll_bar.set)
+        scroll_bar.config(command=self.loglb.yview)
+        self.loglb.config(state='disable')
+        self.loglb.insert(tk.END, "请选择表格所在文件夹路径，选定模式后点击开始处理")
+        self.loglb.grid(column=0, row=4, columnspan=5)
 
-    def select_folder(self):
-        folder_name = tf.askdirectory()
-        if folder_name:
-            self.path.set(folder_name)
-            self.loglb.set("您已选择{}".format(folder_name))
-        else:
-            self.loglb.set("您未选择文件夹")
-
+    @staticmethod
     def log_execution_time(func):
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -66,6 +65,15 @@ class DealFolder:
             return res
 
         return wrapper
+
+    def select_folder(self):
+        folder_name = tf.askdirectory()
+        if folder_name:
+            self.path.set(folder_name)
+            self.loglb.insert(tk.END, "\n您已选择{}".format(folder_name))
+        else:
+            self.path.set('')
+            self.loglb.insert(tk.END, "\n您未选择文件夹")
 
     @log_execution_time
     def filewriter(self):
@@ -136,5 +144,5 @@ class DealFolder:
 
 
 root = tk.Tk()
-DealFolder(root)
+TablesCombo(root)
 root.mainloop()

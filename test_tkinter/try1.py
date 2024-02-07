@@ -6,37 +6,90 @@
 @license: RACE
 @file: try1.py
 @date: 2024/2/5 9:05
-@desc: 
+@desc: https://blog.csdn.net/qq_48979387/article/details/125706562
 """
 from tkinter import *
+import hashlib
+import time
 
-# https://blog.csdn.net/qq_48979387/article/details/125706562
-# print(tk.TkVersion) -- 8.6
-# 组件根据坐标被排列在容器中，窗口的界面是该窗口中最大的容器
-# 坐标系和pygame的一样（屏幕式），左上角为起点，x轴向右延伸，y轴向下延伸。在窗口中，容器的左上角是(0, 0)，不包括窗口的标题栏和菜单栏。
-# 不支持颜色RGB元组形式，但支持颜色名称和十六进制。特殊的颜色名称：SystemButtonFace，浅灰色，组件默认背景色（只能在tk中使用，其他模块不支持）
+LOG_LINE_NUM = 0
 
-root = Tk()
-root.title("my window")
-root.geometry("600x300+20+50")  # geometry还有一些用法，在讲Wm类的时候会介绍
-root.resizable(True, False)
-img = PhotoImage(file="logo.png")
-root.iconphoto(False, img)
-root.config(bg="white")
-root.mainloop()
 
-# 组件有Label, Message, Button, Entry, Text, Canvas, Frame, LabelFrame, Menu, Menubutton, Checkbutton, Radiobutton,
-# Listbox, Scrollbar, Scale, Spinbox, OptionMenu, OptionMenu, PanedWindow, Toplevel
-# 标签用于在窗口上显示文本和图片，消息用于显示多行文本类似Label，按钮点击事件将会传递给设置的回调函数，文本输入框单行，多行，
-# 画布可以显示基本图形文字图片，框架作为一个小容器相当于给组件分组，文字框架外部多了文本提示，菜单在窗口显示或定义弹出式，菜单按钮点击后弹出一个菜单，
-# 多选、单选按钮，列表框显示一个字符串的列表，滚动条控制滚动，尺度条可以添加数字滑块滑动调数值，数字选值框可以输入数字也可按调节按钮，选项菜单下拉菜单选项，
-# 分栏器比Frame功能设定更多比如可调大小，上层窗口可以定义某个窗口的子窗口，
-# 子模块ttk, messagebox, colorchooser, filedialog等，ttk中组件的字体、颜色等功能不能直接修改，要用ttk.style修改，而tkinter主模块中可以直接指定组件样式，
-# 如果在from tkinter import * 后继续导入 from tkinter.ttk import *，就会覆盖tkinter.ttk与tkinter主模块中相同的组件，导致改样式只能使用Style的形式。
-# ttk扩展组件：
-# Combobox 组合选择框，可以输入也可以下拉列表选择
-# Notebook 笔记本，添加多个Frame选项卡，用户可以在不同选项卡之间切换
-# Progressbar 加载时进度条
-# Separator 分割线
-# Treeview 树状图或表格
-# Sizegrip 窗口尺寸的调整按钮
+class MY_GUI():
+    def __init__(self, init_window_name):
+        self.init_window_name = init_window_name
+
+    # 设置窗口
+    def set_init_window(self):
+        self.init_window_name.title("文本处理工具_v1.2")  # 窗口名
+        # self.init_window_name.geometry('320x160+10+10')   #290 160为窗口大小，+10 +10 定义窗口弹出时的默认展示位置
+        self.init_window_name.geometry('1068x681+10+10')
+        # self.init_window_name["bg"] = "pink"  #窗口背景色，其他背景色见：blog.csdn.net/chl0000/article/details/7657887
+        # self.init_window_name.attributes("-alpha",0.9)    #虚化，值越小虚化程度越高
+        # 标签
+        self.init_data_label = Label(self.init_window_name, text="待处理数据")
+        self.init_data_label.grid(row=0, column=0)
+        self.result_data_label = Label(self.init_window_name, text="输出结果")
+        self.result_data_label.grid(row=0, column=12)
+        self.log_label = Label(self.init_window_name, text="日志")
+        self.log_label.grid(row=12, column=0)
+        # 文本框
+        self.init_data_Text = Text(self.init_window_name, width=67, height=35)  # 原始数据录入框
+        self.init_data_Text.grid(row=1, column=0, rowspan=10, columnspan=10)
+        self.result_data_Text = Text(self.init_window_name, width=70, height=49)  # 处理结果展示
+        self.result_data_Text.grid(row=1, column=12, rowspan=15, columnspan=10)
+        self.log_data_Text = Text(self.init_window_name, width=66, height=9)  # 日志框
+        self.log_data_Text.grid(row=13, column=0, columnspan=10)
+        # 按钮
+        self.str_trans_to_md5_button = Button(self.init_window_name, text="字符串转MD5", bg="lightblue", width=10,
+                                              command=self.str_trans_to_md5)  # 调用内部方法  加()为直接调用
+        self.str_trans_to_md5_button.grid(row=1, column=11)
+
+    # 功能函数
+    def str_trans_to_md5(self):
+        src = self.init_data_Text.get(1.0, END).strip().replace("\n", "").encode()
+        # print("src =",src)
+        if src:
+            try:
+                myMd5 = hashlib.md5()
+                myMd5.update(src)
+                myMd5_Digest = myMd5.hexdigest()
+                # print(myMd5_Digest)
+                # 输出到界面
+                self.result_data_Text.delete(1.0, END)
+                self.result_data_Text.insert(1.0, myMd5_Digest)
+                self.write_log_to_Text("INFO:str_trans_to_md5 success")
+            except:
+                self.result_data_Text.delete(1.0, END)
+                self.result_data_Text.insert(1.0, "字符串转MD5失败")
+        else:
+            self.write_log_to_Text("ERROR:str_trans_to_md5 failed")
+
+    # 获取当前时间
+    def get_current_time(self):
+        current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        return current_time
+
+    # 日志动态打印
+    def write_log_to_Text(self, logmsg):
+        global LOG_LINE_NUM
+        current_time = self.get_current_time()
+        logmsg_in = str(current_time) + " " + str(logmsg) + "\n"  # 换行
+        if LOG_LINE_NUM <= 7:
+            self.log_data_Text.insert(END, logmsg_in)
+            LOG_LINE_NUM = LOG_LINE_NUM + 1
+        else:
+            self.log_data_Text.delete(1.0, 2.0)
+            self.log_data_Text.insert(END, logmsg_in)
+
+
+def gui_start():
+    init_window = Tk()  # 实例化出一个父窗口
+    ZMJ_PORTAL = MY_GUI(init_window)
+    # 设置根窗口默认属性
+    ZMJ_PORTAL.set_init_window()
+
+    init_window.mainloop()  # 父窗口进入事件循环，可以理解为保持窗口运行，否则界面不展示
+
+
+gui_start()
