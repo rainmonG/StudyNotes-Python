@@ -1,6 +1,6 @@
+# editor cache
+/.idea/
 # my own tests
 /self_try/*
 # sensitive config
-/configs/sever.ini
-# editor cache
-/.idea/
+/configs/server.ini
