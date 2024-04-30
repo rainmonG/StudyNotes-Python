@@ -114,4 +114,126 @@ get_argument()、get_arguments()获取的是URL查询字符串参数与POST提�
     | cookies   | 客户端提交的Cookie字典                     |
 
 3. 输出响应函数  
-输出响应函数是指一组为客户端生成处理结果的工具函数，开发者调用它们以控制URL的处理结果。常用的输出响应函数：
+输出响应函数是指一组为客户端生成处理结果的工具函数，开发者调用它们以控制URL的处理结果。常用的输出响应函数：  
+1）RequestHandler.set_status(status_code, reason=None)  
+本函数用于设置HTTP Response中的返回码。如果有描述性的语句，则可以赋值给reason参数。  
+2）RequestHandler.set_header(name, value)  
+本函数用于以键值对的方式设置HTTP Response中的HTTP头参数。使用set_header配置的Header值将覆盖之前配置的Header。  
+3）RequestHandler.add_header(name, value)  
+也是用键值对的方式设置HTTP Response中的HTTP头参数，但不同于set_header，add_header配置的参数同键不会覆盖之前的配置。  
+4）RequestHandler.write(chunk)  
+本函数用于将给定的块作为HTTP Body发送给客户端。在一般情况下，用本函数输出字符串给客户端。如果给定的块是一个字典，则会将这个块以JSON格式发送给客户端，同时将HTTP Header中的Content_Type设置成application/json。  
+5）RequestHandler.finish(chunk=None)  
+本函数通知Tornado：Response的生成工作已完成，chunk参数是需要传递给客户端的HTTP Body。调用finish()函数后，Tornado将向客户端发送HTTP Response。本方法适用于对RequestHandler的异步请求处理。  
+注意：在同步或协程访问处理的函数中，无需调用finish()函数。  
+6）RequestHandler.render(template_name, **kwargs)  
+本函数用给定的参数渲染模板。函数中第一个参数是传入模板文件名称，之后以命名参数的形式传入多个模板参数。  
+Tornado的基本模板语法与Django相同，但是功能弱化，高级过滤器不可用。  
+7）RequestHandler.redirect(url, permanent=False, status=None)  
+本函数用于进行页面重定向。在RequestHandler处理过程中，可以随时调用进行页面重定向。  
+8）RequestHandler.clear()  
+本函数清空所有在本次请求之前写入的Header和Body内容。  
+9）RequestHandler.set_cookie(name, value)  
+本函数按键值对设置Response中的Cookie值。  
+10）RequestHandler.clear_all_cookies(path='/', domain=None)
+本函数清空本次请求中的所有Cookie。
+
+### 7.3.4 异步协程化
+Tornado针对RequestHandler的处理函数使用@tornado.gen.coroutine修饰器，将默认的同步机制改为协程机制。  
+> 不知道这一点在当前是否已经out，感觉应该随async await的引入而有了变化。
+
+## 7.4 用户身份验证框架
+用户身份认证几乎是所有网站的必备功能，对于Tornado的开发源头FriendFeed和Facebook这样的社交网站尤其如此，所以Tornado框架本身较其他Python框架集成了最为丰富的用户身份验证功能。使用该框架，开发者能够快速开发出既安全又强大的用户身份认证机制。
+
+### 7.4.1 安全Cookie机制
+Cookie是很多网站为了辨别用户的身份而存储在用户本地终端（Client Side）的数据，定义于RFC2019。在Tornado中使用RequestHandler.get_cookie()、RequestHandler.set_cookie()函数可以方便地对Cookie进行读写。  
+在实际应用中，Cookie经常用于保存Session信息。  
+因为Cookie总是被保存在客户端，所以如何保证其不被篡改是服务器端程序必须解决的问题。Tornado提供了为Cookie信息加密的机制，使得客户端无法随意解析和修改Cookie的键值。  
+- 在tornado.web.Application对象初始化时赋予cookie_secret参数，该参数值是一个字符串，用于保存本网站Cookie加密时的密钥。
+- 在需要读取Cookie的地方用RequestHandler.get_secure_cookie替换原来的RequestHandler.get_cookie调用。
+- 在需要写入Cookie的地方用RequestHandler.set_secure_cookie替换原来的RequestHandler.set_cookie调用。  
+
+注意：cookie_secret参数是Cookie的加密密钥，需要做好保护工作，不能泄露给外部人员。
+
+### 7.4.2 用户身份认证
+在Tornado的RequestHandler类中有一个current_user属性用于保存当前请求的用户名。RequestHandler.current_user的默认值是None，在get()、post()等处理函数中可以随时读取该属性以获得当前的用户名。RequestHandler.current_user是一个只读属性，所以开发者需要重载RequestHandler.get_current_user()以设置该属性值。 简例：
+- 用全局字典dict_sessions保存已经登录的用户信息，比如存“会话ID: 用户名”的键值对。
+- 定义公共基类BaseHandler，该类继承自tornado.web.RequestHandler，用于定义本网站所有处理器的公共属性和行为。重载它的get_current_user()函数，其在开发者访问RequestHandler.current_user属性时自动被Tornado调用。
+- tornado.web.authenticated装饰器使得具有该装饰器的处理函数在执行之前根据current_user是否已经被赋值来判断用户的身份认证情况。如果已经被赋值，则可以进行正常逻辑，否则自动重定向到网站的登录页面。
+- tornado.web.Application的初始化函数中通过login_url参数给出网站的登录页面地址。该地址被用于tornado.web.authenticated装饰器在发现用户尚未验证时重定向到一个URL。
+- Tornado使用bytes类型保存cookie值，因此在用get_secure_cookie()函数读取cookie_secret后需要用decode()函数将其转换为string类型再使用。  
+
+注意：加入身份认证的所有页面处理器需要继承自BaseHandler类，而不是直接继承原来的tornado.RequestHandler类。  
+商用的用户身份认证还要完善更多的内容，例如加入密码验证机制、管理登录超时、将用户信息保护到数据库等。
+
+### 7.4.3 防止跨站攻击
+1. CSRF攻击原理
+跨站请求伪造（Cross-Site Request Forgery，CSRF）是一种对网站的恶意利用。通过CSRF，攻击者可以冒用用户的身份，在用户不知情的情况下执行恶意操作。比如：
+- 用户首先访问了存在CSRF漏洞的网站Site1，成功登录并获取到了Cookie。此后，所有该用户对Site1的访问均会携带Site1的Cookie，因此被Site1认为是有效操作。
+- 此时用户又访问了带有攻击行为的站点Site2，而Site2的返回页面中带有一个访问Site1进行恶意操作的链接，但被伪装成了合法内容。
+- 用户一旦点击恶意链接，就在不知情的情况下向Site1站点发送了请求。因为之前用户在Site1进行过登录且尚未退出，所以Site1在收到用户的请求和附带的Cookie时将认为该请求是用户发出的正常请求。此时，恶意站点的目的已经达到。
+2. 用Tornado防范CSRF  
+为了防止CSRF攻击，要求每个请求包括一个参数值作为令牌来匹配存储在Cookie中的对应值。  
+Tornado应用可以通过一个Cookie头和一个隐藏的HTML表单元素向页面提供令牌。这样，当一个合法页面的表单被提交时，它将包括表单值和已存储的Cookie。如果两者匹配，则Tornado应用认定请求有效。  
+开启Tornado的CSRF防范功能需要两个步骤：
+- 在实例化tornado.web.Application时传入xsrf_cookies=True参数，或者，如果需要初始化的参数过多时，可以通过setting字典的形式传入命名参数。
+- 在每个具有HTML表单的模板文件中，为所有表单添加xsrf_form_html()函数标签。`{% module xsrf_form_html() %}`,为表单添加隐藏元素以防止跨站请求。
+
+Tornado的安全Cookie支持和XSRF防范框架减轻了应用开发者的很多负担。没有它们，开发者需要思考很多防范的细节措施，因此Tornado内建的安全功能也非常有用。
+
+## 7.5 HTML 5 WebSocket的概念及应用
+Tornado的异步特性使得其非常适合服务器的高并发处理，客户端与服务器的持久连接应用架构就是高并发的典型应用。而WebSocket正是在HTTP客户端与服务端之间建立持久连接的HTML 5标准技术。
+
+### 7.5.1 WebSocket的概念
+WebSocket protocol是HTML 5定义的一种新的标准协议（RFC6455），它实现了浏览器与服务器的全双工通信（full-duplex）。
+1. WebSocket的应用场景  
+传统的HTTP和HTML技术适用于客户端主动向服务器发送请求并获得回复的应用场景。但是随着即时通信需求的增多，这样的通信模型有时并不能满足应用的要求。  
+WebSocket与普通Socket通信类似，它打破了原来HTTP的Request和Response一对一的通信模型，同时打破了服务器只能被动地接受客户端请求的应用场景。  
+传统的HTTP+HTML方案只适用于客户端主动发出请求的场景，而无法满足服务器端发起的通信要求。虽然有Ajax、Long poll等基于传统HTTP的动态客户端技术，但这些技术无不采用轮询技术，耗费了大量的网络带宽和计算资源。  
+而WebSocket正是为了应对这样的场景而制定的HTML 5标准，相对于普通的Socket通信，WebSocket又在应用层定义了基本的交互流程，使得Tornado这样的服务器框架和JavaScript客户端可以构建出标准的WebSocket模块。  
+总结WebSocket的特点：
+- WebSocket适合服务器端主动推送的场景。
+- 相对于Ajax和Long poll等技术，WebSocket通信模型更高效。
+- WebSocket仍然与HTTP完成Internet通信。
+- 因为它是HTML 5的标准协议，所以不受企业防火墙的拦截。
+2. WebSocket的通信原理  
+WebSocket的通信原理是在客户端与服务器之间建立TCP持久连接，从而使当服务器有消息需要推送给客户端时能够进行即时通信。  
+虽然WebSocket不是HTTP，但由于在Internet上HTML本身是由HTTP封装并进行传输的，因此WebSocket仍然需要与HTTP进行协作。IETF在RFC6455中定义了基于HTTP链路建立WebSocket信道的标准流程。  
+客户端通过发送HTTP Request告诉服务器需要建立一个WebSocket长连接信道，在HTTP Header中有4个特殊的字段：
+```
+Connection: Upgrade
+Sec-WebSocket-Key: ...
+Upgrade: websocket
+Sec-WebSocket-Version: ..
+```
+它告诉Web服务器，客户端希望建立一个WebSocket连接，客户端使用的WebSocket版本、密钥。  
+服务器在收到该Request后，如果同意建立WebSocket连接则返回一个标准的HTTP Response，其中与WebSocket相关的Header信息：
+```
+Connection: Upgrade
+Upgrade: WebSocket
+Sec-WebSocket-Accept:...
+```
+前面的两条数据告诉客户端：服务器已经将本连接转换为WebSocket连接。而Sec-WebSocket-Accept是将客户端发送的Sec-WebSocket-Key加密后产生的数据，以让客户端确认服务器能够正常工作。  
+至此，在客户端与服务器之间已经建立了一个TCP持久长连接，双方已经可以随时向对方发送消息。
+
+### 7.5.2 服务端编程
+Tornado定义了tornado.websocket.WebSocketHandler类用于处理WebSocket连接的请求，应用开发者应该继承该类并实现其中的open()、on_message()、on_close()函数。
+- WebSocketHandler.open()函数：在一个新的WebSocket连接建立时，Tornado框架会调用此函数。在本函数中，开发者可以和在get()、post()等函数中一样用get_argument()函数获取客户端提交的参数，以及用get_secure_cookie/set_secure_cookie操作Cookie等。
+- WebSocketHandler.on_message(message)函数：建立WebSocket连接后，当收到来自客户端的消息时，Tornado框架会调用本函数。通常，这是服务器端WebSocket编程的核心函数，通过解析收到的消息做出相应的处理。
+- WebSocketHandler.on_close()函数：当WebSocket连接被关闭时，Tornado框架会调用本函数。在本函数中，可以通过访问self.close_code和self.close_reason查询关闭的原因。
+
+除了这3个Tornado框架自动调用的入口函数，WebSocketHandler还提供了两个开发者主动操作WebSocket的函数。
+- WebSocketHandler.write_message(message, binary=False)函数：用于向与本连接相对应的客户端写信息。
+- WebSocketHandler.close(code=None, reason=None)函数：主动关闭WebSocket连接。其中的code和reason用于告诉客户端连接被关闭的原因。参数code必须是一个数值，而reason是一个字符串。
+
+### 7.5.3 客户端编程
+由于WebSocket是HTML 5的标准之一，因此主流浏览器的Web客户端编程语言JavaScript已经支持WebSocket的客户端编程。  
+客户端编程围绕着WebSocket对象展开，在JavaScript中，代码里只需要给WebSocket构造函数传入服务器的URL地址，即可创建一个WebSocket对象。可以为该对象的如下事件指定处理函数以响应它们：
+- WebSocket.onopen：此事件发生在WebSocket连接建立时
+- WebSocket.onmessage：此事件发生在收到了来自服务器的消息时
+- WebSocket.onerror：此事件发生在通信过程中有任何错误时
+- WebSocket.onclose：此事件发生在与服务器的连接关闭时
+
+除了这些事件处理函数，还可以通过WebSocket对象的两个方法进行主动操作：
+- WebSocket.send(data)：向服务器发送消息
+- WebSocket.close()：主动关闭现有连接
