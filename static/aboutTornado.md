@@ -236,4 +236,10 @@ Tornado定义了tornado.websocket.WebSocketHandler类用于处理WebSocket连接
 
 除了这些事件处理函数，还可以通过WebSocket对象的两个方法进行主动操作：
 - WebSocket.send(data)：向服务器发送消息
-- WebSocket.close()：主动关闭现有连接
+- WebSocket.close()：主动关闭现有连接  
+
+### 7.6.3 运营期配置
+虽然Tornado的内置IOLoop服务器可以直接作为运营服务器运行，但部署一个应用到生产环境面临着最大化利用系统资源的新挑战。由于Tornado架构的异步特性，无法用大多数Python网络框架标准WSGI进行站点部署，为了强化Tornado应用的请求吞吐量，在运营环境中通常采用反向代理+多Tornado后台实例的部署策略。  
+反向代理是代理服务器的一种。它根据客户端的请求，从后端 的服务器上获取资源，然后将这些资源返回给客户端。当前最常用的开源反向代理器是Nginx。  
+网站通过Internet DNS服务器将用户浏览器的访问定位到多台Nginx服务器上，每台Nginx服务器又将访问重定向到多台Tornado服务端上。多个Tornado服务既可以部署在一台物理机上，也可以部署在多台物理机上。以资源最大化利用为目的，应该以每个物理机的CPU数量来决定分配在该台物理机上运行的Tornado实例数。  
+在Nginx的配置文件中nginx.conf中，除了一些标准配置，最重要的是upstream、listen和proxy_pass指令。upstream中定义了多个后台Tornado服务的IP地址及各自的端口号；server中的listen定义了Nginx监听端口号；proxy_pass定义将所有对根目录的访问由之前定义的upstream中的服务器组提供服务，在默认情况下Nginx以循环方式分配到达的访问请求。  
