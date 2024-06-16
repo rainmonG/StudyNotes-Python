@@ -17,6 +17,9 @@ from base.db.aio_mysql_util import AioMysqlHandler
 
 class AlbumsHandler(tornado.web.RequestHandler):
 
+    def initialize(self) -> None:
+        self.db_handler = AioMysqlHandler()
+
     # 设置允许跨域
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
@@ -24,7 +27,6 @@ class AlbumsHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Methods", "POST,GET,OPTIONS")
 
     async def get(self, *args, **kwargs):
-        handler = AioMysqlHandler()
         try:
             print(f"收到请求：{self.request.host}")
             artists: list = literal_eval(self.get_query_argument("artists"))
@@ -33,7 +35,7 @@ class AlbumsHandler(tornado.web.RequestHandler):
             """
             if artists:
                 sql += f" and artist in {escape_item(artists, charset='utf8')}"
-            df = await handler.query_pd(sql)
+            df = await self.db_handler.query_pd(sql)
             print('异步done')
             df['price'] = pd.to_numeric(df['price'])
             df = df.where(pd.notna(df), None)
@@ -45,7 +47,6 @@ class AlbumsHandler(tornado.web.RequestHandler):
             self.write({"message": "server error！", "data": None})
 
     async def post(self, *args, **kwargs):
-        handler = AioMysqlHandler()
         try:
             print(f"收到新增请求：{self.request.host}")
             content_type = self.request.headers.get('content-type')
@@ -68,7 +69,7 @@ class AlbumsHandler(tornado.web.RequestHandler):
                 sql = """
                 insert album ({}) values ({})
                 """.format(','.join(df.columns), ','.join(['%s'] * len(df.columns)))
-                await handler.execute_many(sql, df)
+                await self.db_handler.execute_many(sql, df)
                 print('异步新增done')
                 self.set_status(201)
                 self.write({"message": "新增成功", "data": None})
