@@ -77,7 +77,7 @@ class AioMysqlHandler:
             async with self.pool.acquire() as conn:
                 async with conn.cursor(aiomysql.cursors.DictCursor) as cur:
                     try:
-                        await cur.executemany(sql, data.tolist())
+                        await cur.executemany(sql, data.values.tolist())
                         await conn.commit()
                     except Exception as e:
                         await conn.rollback()
