@@ -6,6 +6,7 @@
 @feature : 
 @description：
 """
+import json
 from ast import literal_eval
 
 import pandas as pd
@@ -38,6 +39,39 @@ class AlbumsHandler(tornado.web.RequestHandler):
             df = df.where(pd.notna(df), None)
             self.set_status(200)
             self.write({"message": "查询成功", "data": df.to_dict('records')})
+        except Exception as e:
+            print("query error", e)
+            self.set_status(500)
+            self.write({"message": "server error！", "data": None})
+
+    async def post(self, *args, **kwargs):
+        handler = AioMysqlHandler()
+        try:
+            print(f"收到新增请求：{self.request.host}")
+            content_type = self.request.headers.get('content-type')
+            if content_type.startswith('text/plain'):
+                post_data = json.loads(self.request.body.decode())
+                df = pd.Series(post_data).to_frame().T
+            elif content_type.startswith('multipart/form-data'):
+                post_data = {}
+                for key in self.request.arguments:
+                    post_data[key] = self.get_body_arguments(key)
+                df = pd.DataFrame(post_data)
+            else:
+                self.set_status(400)
+                self.write({"message": "错误请求", "data": None})
+                return
+            if df.empty:
+                self.set_status(400)
+                self.write({"message": "无新增", "data": None})
+            else:
+                sql = """
+                insert album ({}) values ({})
+                """.format(','.join(df.columns), ','.join(['%s'] * len(df.columns)))
+                await handler.execute_many(sql, df)
+                print('异步新增done')
+                self.set_status(201)
+                self.write({"message": "新增成功", "data": None})
         except Exception as e:
             print("query error", e)
             self.set_status(500)
