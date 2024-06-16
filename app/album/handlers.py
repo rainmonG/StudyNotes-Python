@@ -32,7 +32,7 @@ class AlbumsHandler(tornado.web.RequestHandler):
             """
             if artists:
                 sql += f" and artist in {escape_item(artists, charset='utf8')}"
-            df = await handler.execute_sqls(['SELECT sleep(2)', sql])
+            df = await handler.query_pd(sql)
             print('异步done')
             df['price'] = pd.to_numeric(df['price'])
             df = df.where(pd.notna(df), None)
