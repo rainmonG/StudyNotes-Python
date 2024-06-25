@@ -22,5 +22,5 @@ print(df1)
 
 df1['old_board_code'] = df1.apply(lambda r: '' if r['old_board_code'] == r['board_code'] else r['old_board_code'],
                                   axis=1)
-df1 = df1.sort_values(by=['exist_date', 'old_board_code'], ascending=False, na_position='last')
+df1 = df1.sort_values(by=['num_new', 'exist_date', 'old_board_code'], ascending=False, na_position='last')
 print(df1)
