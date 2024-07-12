@@ -12,13 +12,10 @@ from ast import literal_eval
 import pandas as pd
 import tornado
 from pymysql.converters import escape_item
-from base.db.aio_mysql_util import AioMysqlHandler
+from base.db.db_handler import db_handler
 
 
 class AlbumsHandler(tornado.web.RequestHandler):
-
-    def initialize(self) -> None:
-        self.db_handler = AioMysqlHandler()
 
     # 设置允许跨域
     def set_default_headers(self):
@@ -26,27 +23,32 @@ class AlbumsHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "Content-Type")
         self.set_header("Access-Control-Allow-Methods", "POST,GET,OPTIONS")
 
-    async def get(self, *args, **kwargs):
+    async def get(self):
         try:
             print(f"收到请求：{self.request.host}")
+            self.set_status(200)
             artists: list = literal_eval(self.get_query_argument("artists"))
+            if not isinstance(artists, list):
+                self.write({"code": "400", "message": "请求参数不合法", "data": None})
+                await self.finish()
+                return
             sql = """
             select * from album where 1 = 1 
             """
             if artists:
                 sql += f" and artist in {escape_item(artists, charset='utf8')}"
-            df = await self.db_handler.query_pd(sql)
+            df = await db_handler.get_mysql_coroutine('study').query_pd(sql)
             print('异步done')
             df['price'] = pd.to_numeric(df['price'])
             df = df.where(pd.notna(df), None)
-            self.set_status(200)
-            self.write({"message": "查询成功", "data": df.to_dict('records')})
+            self.write({"code": "200", "message": "查询成功", "data": df.to_dict('records')})
         except Exception as e:
-            print("query error", e)
             self.set_status(500)
             self.write({"message": "server error！", "data": None})
+            await self.finish()
+            raise e
 
-    async def post(self, *args, **kwargs):
+    async def post(self):
         try:
             print(f"收到新增请求：{self.request.host}")
             content_type = self.request.headers.get('content-type')
@@ -69,11 +71,12 @@ class AlbumsHandler(tornado.web.RequestHandler):
                 sql = """
                 insert album ({}) values ({})
                 """.format(','.join(df.columns), ','.join(['%s'] * len(df.columns)))
-                await self.db_handler.execute_many(sql, df)
+                await db_handler.get_mysql_coroutine('study').execute_many(sql, df)
                 print('异步新增done')
                 self.set_status(201)
                 self.write({"message": "新增成功", "data": None})
         except Exception as e:
-            print("query error", e)
             self.set_status(500)
             self.write({"message": "server error！", "data": None})
+            await self.finish()
+            raise e

@@ -42,10 +42,11 @@ class AioMysqlHandler:
         if not self.pool:
             await self.init_pool()
         async with self.pool.acquire() as conn:
-            async with conn.cursor(aiomysql.cursors.DictCursor) as cur:
+            async with conn.cursor() as cur:
                 await cur.execute(sql, param)
                 res = await cur.fetchall()
-                data = pd.DataFrame(res)
+                await conn.commit()
+                data = pd.DataFrame(res, columns=[c[0] for c in cur.description])
                 return data
 
     async def execute_sqls(self, sqls: list):
@@ -57,14 +58,16 @@ class AioMysqlHandler:
         if not self.pool:
             await self.init_pool()
         async with self.pool.acquire() as conn:
-            async with conn.cursor(aiomysql.cursors.DictCursor) as cur:
+            async with conn.cursor() as cur:
+                data = None
                 try:
                     for sql in sqls:
                         await cur.execute(sql)
+                        if cur.description:
+                            res = await cur.fetchall()
+                            data = pd.DataFrame(res, columns=[c[0] for c in cur.description])
                     await conn.commit()
-                    res = await cur.fetchall()
-                    data = pd.DataFrame(res)
-                    return data
+                    return data if data else cur
                 except Exception as e:
                     await conn.rollback()
                     raise e
