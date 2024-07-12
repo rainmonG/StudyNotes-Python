@@ -13,5 +13,10 @@ URLS = [
         'name': 'album查询',
         'url': r'/album',
         'handler': AlbumsHandler
+    },
+    {
+        'name': 'artists选项',
+        'url': r'/artists',
+        'handler': ArtistsOptions
     }
 ]

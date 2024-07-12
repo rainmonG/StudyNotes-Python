@@ -7,6 +7,7 @@
 @description：
 """
 import json
+import re
 from ast import literal_eval
 
 import pandas as pd
@@ -75,6 +76,38 @@ class AlbumsHandler(tornado.web.RequestHandler):
                 print('异步新增done')
                 self.set_status(201)
                 self.write({"message": "新增成功", "data": None})
+        except Exception as e:
+            self.set_status(500)
+            self.write({"message": "server error！", "data": None})
+            await self.finish()
+            raise e
+
+
+class ArtistsOptions(tornado.web.RequestHandler):
+
+    # 设置允许跨域
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type")
+        self.set_header("Access-Control-Allow-Methods", "GET,OPTIONS")
+
+    async def get(self):
+        try:
+            print(f"收到请求：{self.request.host}")
+            self.set_status(200)
+            artist_key: str = self.get_query_argument("artist_key", strip=False)
+            if not isinstance(artist_key, str):
+                self.write({"code": "400", "message": "请求参数不合法", "data": None})
+                await self.finish()
+                return
+            sql = """
+            select distinct artist from album where 1 = 1 
+            """
+            sql += f" and artist regexp {escape_item(re.escape(artist_key), 'utf8')}"
+            df = await db_handler.get_mysql_coroutine('study').query_pd(sql)
+            print('异步done')
+            artists = df['artist'].dropna().unique().tolist()
+            self.write({"code": "200", "message": "查询成功", "data": artists})
         except Exception as e:
             self.set_status(500)
             self.write({"message": "server error！", "data": None})
