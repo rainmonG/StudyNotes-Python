@@ -10,13 +10,18 @@ from app.album.handlers import *
 
 URLS = [
     {
-        'name': 'album查询',
-        'url': r'/album',
+        'name': 'album分页查询',
+        'url': r'/albums',
         'handler': AlbumsHandler
     },
     {
+        'name': 'album查询总计',
+        'url': r'/albums_count',
+        'handler': AlbumsCount
+    },
+    {
         'name': 'artists选项',
-        'url': r'/artists',
+        'url': r'/artists_option',
         'handler': ArtistsOptions
     }
 ]
