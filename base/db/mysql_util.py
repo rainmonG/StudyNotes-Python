@@ -34,9 +34,14 @@ class MysqlHandler:
         :return:
         """
         with self.engine.begin() as conn:
+            df = None
+            res = None
             try:
                 for sql in sqls:
-                    conn.execute(text(sql))
+                    res = conn.execute(text(sql))
+                    if res.returns_rows:
+                        df = pd.DataFrame(res.fetchall(), columns=list(res.keys()))
+                return res if df is None else df
             except Exception as e:
                 conn.rollback()
                 raise e
@@ -49,26 +54,12 @@ class MysqlHandler:
         """
         with self.engine.begin() as conn:
             data = pd.read_sql_query(sql, conn)
-            data.columns = [c.lower() for c in data.columns]
             return data
 
 
 if __name__ == '__main__':
     handler = MysqlHandler()
-    metadata_obj = MetaData()
-    user_table = Table(
-        "user_account",
-        metadata_obj,
-        Column('id', Integer, primary_key=True),
-        Column('name', String(30)),
-        Column('fullname', String)
-    )
-    address_table = Table(
-        "address",
-        metadata_obj,
-        Column('id', Integer, primary_key=True),
-        Column('user_id', ForeignKey('user_account.id'), nullable=False),
-        Column('email_address', String, nullable=False)
-    )
-    print(user_table.c)
-    print(user_table.primary_key)
+    sqls = [
+            "select 1 as test1;", "select 2 as test2;"
+            ]
+    print(handler.execute_sqls(sqls))
