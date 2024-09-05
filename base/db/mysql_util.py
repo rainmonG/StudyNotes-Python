@@ -8,9 +8,6 @@
 """
 import pandas as pd
 from sqlalchemy import create_engine, text
-from sqlalchemy import MetaData
-from sqlalchemy import Table, Column, Integer, String
-from sqlalchemy import ForeignKey
 
 from configs.util import Configs
 
@@ -22,8 +19,7 @@ class MysqlHandler:
         初始化数据库连接
         :param db: 数据库名
         """
-        conf = Configs()
-        config = conf.get_mysql_conf()
+        config = Configs.get_mysql_conf()
         self.engine = create_engine(
             f"mysql+mysqldb://{config['user']}:{config['password']}@{config['host']}:{config['port']}/{db}")
 

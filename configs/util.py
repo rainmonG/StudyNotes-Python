@@ -13,33 +13,26 @@ from configparser import ConfigParser
 CUR_DIR = os.path.dirname(__file__)
 
 
-def singleton(cls):
-    _instance = {}
-
-    def _singleton(*args, **kargs):
-        if cls not in _instance:
-            _instance[cls] = cls(*args, **kargs)
-        return _instance[cls]
-
-    return _singleton
-
-
-@singleton
 class Configs:
-    def __init__(self):
-        self._config = ConfigParser()  # 创建对象
-        self._config.read(os.path.join(CUR_DIR, 'server.ini'), encoding="utf-8")  # 读取配置文件
+    _config = ConfigParser()  # 创建对象
+    _config.read(os.path.join(CUR_DIR, 'server.ini'), encoding="utf-8")  # 读取配置文件
 
-    def get_mysql_conf(self) -> dict:
-        return {
-            'host': self._config.get('mysql', 'host'),
-            'port': self._config.get('mysql', 'port'),
-            'user': self._config.get('mysql', 'user'),
-            'password': self._config.get('mysql', 'password')
-        }
+    @classmethod
+    def get_mysql_conf(cls) -> dict:
+        sections = ['host', 'port', 'user', 'password']
+        return {k: cls._config.get('mysql', k) for k in sections}
+
+    @classmethod
+    def get_redis_conf(cls) -> dict:
+        sections = ['host', 'port']
+        return {k: cls._config.get('redis', k) for k in sections}
+
+    @classmethod
+    def get_mongo_conf(cls) -> dict:
+        sections = ['host', 'port', 'username', 'password']
+        return {k: cls._config.get('mongodb', k) for k in sections}
 
 
 if __name__ == '__main__':
-    conf = Configs()
-    config = conf.get_mysql_conf()
+    config = Configs.get_mysql_conf()
     print(config['host'])

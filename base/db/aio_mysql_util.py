@@ -25,8 +25,7 @@ class AioMysqlHandler:
         初始化连接池，连接池的意义在于，保持指定数量的可用连接，当一个查询执行前从池子中取一个连接，查询结束后将连接放回池子中，避免频繁连接数据库
         :return: 连接池
         """
-        conf = Configs()
-        config = conf.get_mysql_conf()
+        config = Configs.get_mysql_conf()
         self.pool = await aiomysql.create_pool(
             host=config['host'],
             port=int(config['port']),
