@@ -6,22 +6,17 @@
 @feature : 
 @description：
 """
+import asyncio
 import tornado
-import app.album.urls as album
 
-handlers = (
-    album,
-)
-mapping_list = [(h['url'], h['handler']) for u in handlers for h in u.URLS]
+from handler_mapping import handlers
 
 
-def main():
-    # 定义请求的路径和响应的请求类，此类会根据你发出的请求区分get 还是post而给予不同的处理
-    application = tornado.web.Application(mapping_list)
-    # 绑定端口，单进程启动
-    application.listen(8000)
-    tornado.ioloop.IOLoop.current().start()
-
+async def main():
+    app = tornado.web.Application(handlers=handlers)
+    app.listen(8888, '0.0.0.0')
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
-    main()
+    print('已于8888端口启动\nCTRL+C退出')
+    asyncio.run(main())

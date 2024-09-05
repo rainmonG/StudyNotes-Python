@@ -10,8 +10,8 @@ import redis
 from pymongo import MongoClient
 from pymongo.database import Database
 
-from base.db.aio_mysql_util import AioMysqlHandler
-from base.db.mysql_util import MysqlHandler
+from db.aio_mysql_util import AioMysqlHandler
+from db.mysql_util import MysqlHandler
 from configs.util import Configs
 
 

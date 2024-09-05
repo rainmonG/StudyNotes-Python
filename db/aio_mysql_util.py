@@ -34,7 +34,7 @@ class AioMysqlHandler:
             db=self.db
         )
 
-    async def query_pd(self, sql: str, param: list = None):
+    async def query_pd(self, sql: str, param: list = None) -> pd.DataFrame:
         """
         从空闲池获取连接的协程，根据需要创建新连接
         """

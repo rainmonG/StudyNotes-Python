@@ -13,25 +13,25 @@ from ast import literal_eval
 import pandas as pd
 import tornado
 from pymysql.converters import escape_item
-from base.db.db_handler import db_handler
+
+from db.db_handler import db_handler
+from base.base_handler import BaseHandler
 
 
-class AlbumsHandler(tornado.web.RequestHandler):
-
-    # 设置允许跨域
-    def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "Content-Type")
-        self.set_header("Access-Control-Allow-Methods", "POST,GET,OPTIONS")
+class AlbumsHandler(BaseHandler):
 
     async def get(self):
+        if self.need_roles:
+            print('需要权限')
         try:
             print(f"收到{self.request.host}请求：{self.request.full_url()}")
             self.set_status(200)
-            params = {k: self.request.query_arguments[k][0].decode() for k in self.request.query_arguments}
-            artists: list = literal_eval(params.get('artists'))
-            page_index = int(params.get("page_index"))
-            page_size = int(params.get("page_size"))
+            artists_str = self.get_query_argument('artists')
+            page_index = self.get_query_argument('page_index', 1)
+            page_size = self.get_query_argument('page_size', 10)
+            artists: list = literal_eval(artists_str)
+            page_index = int(page_index)
+            page_size = int(page_size)
             if not isinstance(artists, list):
                 self.write({"code": "400", "message": "请求参数不合法", "data": None})
                 await self.finish()
@@ -86,13 +86,7 @@ class AlbumsHandler(tornado.web.RequestHandler):
             raise e
 
 
-class ArtistsOptions(tornado.web.RequestHandler):
-
-    # 设置允许跨域
-    def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "Content-Type")
-        self.set_header("Access-Control-Allow-Methods", "GET,OPTIONS")
+class ArtistsOptions(BaseHandler):
 
     async def get(self):
         try:
@@ -117,13 +111,7 @@ class ArtistsOptions(tornado.web.RequestHandler):
             raise e
 
 
-class AlbumsCount(tornado.web.RequestHandler):
-
-    # 设置允许跨域
-    def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "Content-Type")
-        self.set_header("Access-Control-Allow-Methods", "GET,OPTIONS")
+class AlbumsCount(BaseHandler):
 
     async def get(self):
         try:
