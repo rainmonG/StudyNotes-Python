@@ -11,7 +11,6 @@ import re
 from ast import literal_eval
 
 import pandas as pd
-import tornado
 from pymysql.converters import escape_item
 
 from db.db_handler import db_handler
@@ -20,25 +19,19 @@ from base.base_handler import BaseHandler
 
 class AlbumsHandler(BaseHandler):
 
-    async def get(self):
+    async def get(self, artist):
         if self.need_roles:
             print('需要权限')
         try:
-            print(f"收到{self.request.host}请求：{self.request.full_url()}")
+            print(f"收到{self.request.host}请求：{self.request.uri}")
             self.set_status(200)
-            artists_str = self.get_query_argument('artists')
             page_index = self.get_query_argument('page_index', 1)
             page_size = self.get_query_argument('page_size', 10)
-            artists: list = literal_eval(artists_str)
             page_index = int(page_index)
             page_size = int(page_size)
-            if not isinstance(artists, list):
-                self.write({"code": "400", "message": "请求参数不合法", "data": None})
-                await self.finish()
-                return
             conditon = ''
-            if artists:
-                conditon += f" and artist in {escape_item(artists, charset='utf8')}"
+            if artist:
+                conditon += f" and artist = {escape_item(artist, charset='utf8')}"
             sql = f"""
             select * from album where 1 = 1 {conditon}
             limit {(page_index - 1) * page_size}, {page_size}
