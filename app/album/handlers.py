@@ -47,14 +47,13 @@ class AlbumsHandler(BaseHandler):
         try:
             if not self.json_args or set(self.json_args).difference(['title', 'artist', 'price']):
                 raise ValueError('参数错误')
-            df = pd.DataFrame(self.json_args)
             sql = """
             insert album ({}) values ({})
-            """.format(','.join(df.columns), ','.join(['%s'] * len(df.columns)))
-            await db_handler.get_mysql_coroutine('study').execute_many(sql, df)
+            """.format(','.join(self.json_args.keys()), ','.join(['%s'] * len(self.json_args)))
+            await db_handler.get_mysql_coroutine('study').execute_single(sql, list(self.json_args.values()))
             self.return_response(message="新增成功")
         except Exception as e:
-            self.return_response(message=f"Error: {str(e)}")
+            self.return_response(code='500', message=f"Error: {str(e)}")
 
 
 class ArtistsOptions(BaseHandler):
@@ -70,7 +69,7 @@ class ArtistsOptions(BaseHandler):
             artists = df['artist'].dropna().unique().tolist()
             self.return_response(message="查询成功", data=artists)
         except Exception as e:
-            self.return_response(message=f"Error: {str(e)}")
+            self.return_response(code='500', message=f"Error: {str(e)}")
 
 
 class AlbumsCount(BaseHandler):
@@ -89,4 +88,4 @@ class AlbumsCount(BaseHandler):
             df = await db_handler.get_mysql_coroutine('study').query_pd(sql)
             self.return_response(message="查询成功", data=int(df.loc[0, 'total']))
         except Exception as e:
-            self.return_response(message=f"Error: {str(e)}")
+            self.return_response(code='500', message=f"Error: {str(e)}")
