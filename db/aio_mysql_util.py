@@ -48,6 +48,25 @@ class AioMysqlHandler:
                 data = pd.DataFrame(res, columns=[c[0] for c in cur.description])
                 return data
 
+    async def execute_single(self, sql: str, param: list = None):
+        """
+        执行SQL
+        :param sql: SQL
+        :param param: 有占位符时参数
+        :return:
+        """
+        if not self.pool:
+            await self.init_pool()
+        async with self.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                try:
+                    await cur.execute(sql, param)
+                    await conn.commit()
+                    return cur
+                except Exception as e:
+                    await conn.rollback()
+                    raise e
+
     async def execute_sqls(self, sqls: list):
         """
         执行DDL

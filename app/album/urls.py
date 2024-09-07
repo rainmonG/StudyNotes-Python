@@ -16,8 +16,8 @@ URLS = [
     },
     {
         'name': 'album查询',
-        'url': r'/albums/(?P<artist>.+)',
-        'handler': AlbumsHandler
+        'url': r'/albums_query',
+        'handler': AlbumsQueryHandler
     },
     {
         'name': 'album查询总计',
@@ -25,8 +25,8 @@ URLS = [
         'handler': AlbumsCount
     },
     {
-        'name': 'artists选项',
-        'url': r'/artists_option',
+        'name': 'artists模糊选项',
+        'url': r'/artists_option/(?P<artist_key>.*)',
         'handler': ArtistsOptions
     }
 ]
