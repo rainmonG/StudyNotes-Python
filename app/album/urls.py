@@ -15,6 +15,11 @@ URLS = [
         'handler': AlbumsHandler
     },
     {
+        'name': 'album删除',
+        'url': r'/albums_delete',
+        'handler': AlbumsDeleteHandler
+    },
+    {
         'name': 'album查询',
         'url': r'/albums_query',
         'handler': AlbumsQueryHandler

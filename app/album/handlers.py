@@ -31,7 +31,7 @@ class AlbumsQueryHandler(BaseHandler):
             if artists:
                 conditon += f" and artist in {escape_item(artists, charset='utf8')}"
             sql = f"""
-            select * from album where 1 = 1 {conditon}
+            select id, title, artist, price from album where 1 = 1 {conditon}
             limit {(page_index - 1) * page_size}, {page_size}
             """
             df = await db_handler.get_mysql_coroutine('study').query_pd(sql)
@@ -52,6 +52,19 @@ class AlbumsHandler(BaseHandler):
             """.format(','.join(self.json_args.keys()), ','.join(['%s'] * len(self.json_args)))
             await db_handler.get_mysql_coroutine('study').execute_single(sql, list(self.json_args.values()))
             self.return_response(message="新增成功")
+        except Exception as e:
+            self.return_response(code='500', message=f"Error: {str(e)}")
+
+
+class AlbumsDeleteHandler(BaseHandler):
+    async def post(self):
+        try:
+            if not self.json_args or set(self.json_args).difference(['ids']):
+                raise ValueError('参数错误')
+            sql = """delete from album where id in {}
+            """.format(escape_item(self.json_args['ids'], 'utf8'))
+            await db_handler.get_mysql_coroutine('study').execute_single(sql)
+            self.return_response(message="删除成功")
         except Exception as e:
             self.return_response(code='500', message=f"Error: {str(e)}")
 
