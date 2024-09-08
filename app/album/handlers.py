@@ -42,6 +42,21 @@ class AlbumsQueryHandler(BaseHandler):
             self.return_response(code='500', message=f"server error: {str(e)}")
 
 
+class AlbumsStatisticHandler(BaseHandler):
+    async def get(self):
+        try:
+            sql = '''SELECT artist, COUNT(*) count, round(AVG(price), 2) avg_price FROM `album`
+            GROUP BY artist
+            ORDER BY count DESC, avg_price DESC
+            LIMIT 5'''
+            df = await db_handler.get_mysql_coroutine('study').query_pd(sql)
+            df['avg_price'] = df['avg_price'].astype(float)
+            df.loc[:, 'color'] = ['red', 'orange', 'yellow', 'green', 'blue'][:df.shape[0]]
+            self.return_response(data=df.to_dict(orient='records'))
+        except Exception as e:
+            self.return_response(code='500', message=f"Error: {str(e)}")
+
+
 class AlbumsHandler(BaseHandler):
     async def post(self):
         try:

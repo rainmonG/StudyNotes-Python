@@ -33,5 +33,10 @@ URLS = [
         'name': 'artists模糊选项',
         'url': r'/artists_option/(?P<artist_key>.*)',
         'handler': ArtistsOptions
-    }
+    },
+    {
+        'name': 'artists前5统计',
+        'url': r'/artists_top5',
+        'handler': AlbumsStatisticHandler
+    },
 ]
