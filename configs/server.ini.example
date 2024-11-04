@@ -1,0 +1,13 @@
+[DEFAULT]
+host = localhost
+[mysql]
+port = 3306
+user = xxxx
+password = xxxx
+[redis]
+port = 6379
+[mongodb]
+port = 27017
+username = xxxx
+password = xxxx
+
