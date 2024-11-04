@@ -20,8 +20,7 @@ class DBHelper:
         self._mysql_sync = {}
         self._mysql_async = {}
         self._redis = {}
-        self._mongo_pool = None
-        self._mongodb = {}
+        self._mongodb = None
 
     def get_mysql_handler(self, db: str) -> MysqlHandler:
         if not self._mysql_sync.get(db):
@@ -41,14 +40,13 @@ class DBHelper:
             self._redis[db] = redis.Redis(connection_pool=pool)
         return self._redis[db]
 
-    def get_mongodb(self, db: str = 'study') -> Database:
-        if not self._mongo_pool:
+    def get_mongodb(self) -> Database:
+        if not self._mongodb:
             conf = Configs.get_mongo_conf()
-            self._mongo_pool = MongoClient(host=conf['host'], port=int(conf['port']),
-                                           username=conf['username'], password=conf['password'])
-        if not self._mongodb.get(db):
-            self._mongodb[db] = self._mongo_pool[db]
-        return self._mongodb[db]
+            self._mongodb = MongoClient(host=conf['host'], port=int(conf['port']),
+                                        username=conf['username'], password=conf['password'],
+                                        authSource=conf['dbase'])[conf['dbase']]
+        return self._mongodb
 
 
 db_handler = DBHelper()

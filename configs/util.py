@@ -29,7 +29,7 @@ class Configs:
 
     @classmethod
     def get_mongo_conf(cls) -> dict:
-        sections = ['host', 'port', 'username', 'password']
+        sections = ['host', 'port', 'username', 'password', 'dbase']
         return {k: cls._config.get('mongodb', k) for k in sections}
 
 
