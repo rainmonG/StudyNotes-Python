@@ -25,6 +25,7 @@ class BaseHandler(tornado.web.RequestHandler):
     def initialize(self, raw_uri):
         self.raw_uri = raw_uri
         self.json_args = {}
+        self.need_roles = []
 
     async def prepare(self):
         print(f"收到{self.request.remote_ip}请求：{tornado.escape.url_unescape(self.request.uri)}")
