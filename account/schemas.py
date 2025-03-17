@@ -1,12 +1,13 @@
 """
 @Time : 2024-07-28 22:23
 @Author : rainmon
-@File : models.py
+@File : schemas.py
 @Project : StudyNotes-Python
 @feature : 
 @description：
 """
 import enum
+from typing import Any, Self
 
 from pydantic import BaseModel, EmailStr, conlist
 
@@ -17,10 +18,9 @@ class RoleType(enum.Enum):
     SPEC = "spec"
 
 class UserBase(BaseModel):
-    uid: str
     username: str
     email: EmailStr | None = None
-    full_name: str | None = None
+    fullname: str | None = None
     roles: conlist(RoleType, min_length=0) = []
 
     class Config:
@@ -32,7 +32,25 @@ class UserIn(UserBase):
 
 
 class UserOut(UserBase):
-    pass
+    uid: str
+
+    @classmethod
+    def model_validate(
+        cls,
+        obj: Any,
+        *,
+        strict: bool | None = None,
+        from_attributes: bool | None = None,
+        context: Any | None = None,
+    ) -> Self:
+        return UserOut(
+            uid=obj.uid.hex,
+            username=obj.username,
+            email=obj.email,
+            fullname=obj.fullname,
+            roles=[_.role for _ in obj.roles],
+        )
+
 
 
 class UserInDB(UserBase):
