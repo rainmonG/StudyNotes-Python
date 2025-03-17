@@ -8,8 +8,32 @@
 """
 import pandas as pd
 from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session
+from sqlalchemy.engine import URL
 
 from configs.util import Configs
+
+_config = Configs.get_mysql_conf()
+
+
+def get_con_url(db: str = 'study'):
+    connection_url = URL.create(
+        "mysql+mysqldb",
+        username=_config['user'],
+        password=_config['password'],
+        host=_config['host'],
+        port=_config['port'],
+        database=db,
+        query=dict(charset="utf8mb4"),
+    )
+    return connection_url.render_as_string(hide_password=False)
+
+def _get_engine(db: str = 'study'):
+    return create_engine(get_con_url(db))
+
+
+def get_session(db: str = 'study'):
+    return Session(_get_engine(db), expire_on_commit=False)
 
 
 class MysqlHandler:
@@ -19,9 +43,7 @@ class MysqlHandler:
         初始化数据库连接
         :param db: 数据库名
         """
-        config = Configs.get_mysql_conf()
-        self.engine = create_engine(
-            f"mysql+mysqldb://{config['user']}:{config['password']}@{config['host']}:{config['port']}/{db}")
+        self.engine = _get_engine(db)
 
     def execute_sqls(self, sqls: list):
         """

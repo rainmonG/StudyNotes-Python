@@ -8,8 +8,8 @@
 """
 from fastapi import APIRouter
 
-from account import user
+from account.routers import router as account_routers
 
 
 router = APIRouter()
-router.include_router(user.router)
+router.include_router(account_routers)
